@@ -67,14 +67,6 @@ impl NhlApi {
             None
         }
     }
-
-    pub fn any_active_games(&self) -> bool {
-        self.dates.iter().any(|date| {
-            date.games
-                .iter()
-                .any(|game| game.status.detailedState == "In Progress")
-        })
-    }
 }
 
 #[derive(Serialize, Deserialize)]
