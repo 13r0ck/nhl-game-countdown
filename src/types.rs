@@ -8,7 +8,7 @@ pub struct LaMetricIndicator {
 }
 
 impl LaMetricIndicator {
-    pub fn new(text: String, icon: u32) -> LaMetricIndicator {
+    pub fn new(text: String, icon: Option<usize>) -> LaMetricIndicator {
         LaMetricIndicator {
             frames: vec![Frame::new(text, icon)],
         }
@@ -19,14 +19,14 @@ impl LaMetricIndicator {
 #[serde(crate = "rocket::serde")]
 pub struct Frame {
     text: String,
-    icon: Option<u32>,
+    icon: Option<usize>,
 }
 
 impl Frame {
-    fn new(text: String, icon: u32) -> Frame {
+    fn new(text: String, icon: Option<usize>) -> Frame {
         Frame {
             text,
-            icon: Some(icon),
+            icon: icon,
         }
     }
 }
