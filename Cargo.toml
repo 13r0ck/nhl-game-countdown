@@ -1,5 +1,5 @@
 [package]
-name = "avalanche_api"
+name = "nhl-game-countdown"
 version = "0.1.0"
 edition = "2018"
 

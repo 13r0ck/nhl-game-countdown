@@ -22,7 +22,7 @@ WORKDIR /usr/server
 # 1d: Build the package using the actual source code
 RUN cargo install --target x86_64-unknown-linux-musl --path . --features=vendored
 #RUN cargo build --release
-RUN cp ./target/x86_64-unknown-linux-musl/release/avalanche_api /compile-path/server/
+RUN cp ./target/x86_64-unknown-linux-musl/release/nhl-game-countdown /compile-path/server/
 
 # Changing the volume from within the Dockerfile: If any build steps change the data within the volume after it has been declared, those changes will be discarded. Thus:
 VOLUME /compile-path
@@ -36,4 +36,4 @@ FROM alpine:latest
 COPY --from=builder /compile-path/server /server
 RUN ls /server
 USER 1000
-CMD ROCKET_PORT=$PORT ./server/avalanche_api
+CMD ROCKET_PORT=$PORT ./server/nhl-game-countdown
