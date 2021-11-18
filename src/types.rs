@@ -38,25 +38,31 @@ pub struct NhlApi {
 }
 
 impl NhlApi {
-    pub fn next_game_time(self, now: DateTime<Utc>) -> Option<i64> {
+    pub fn current_or_next_game(self, now: DateTime<Utc>) -> Option<(i64, bool)> {
         if let Some(t) = self
             .dates
             .into_iter()
-            .map(|date| date.games.into_iter().map(|game| game.gameDate))
+            // take nhl api data structure and convert it into a iter of tuple (date, is_active)
+            .map(|date| {
+                date.games
+                    .into_iter()
+                    .map(|game| (game.gameDate, (game.status.detailedState == "In Progress")))
+            })
             .flatten()
-            .find(|time| {
-                if let Ok(dt) = DateTime::parse_from_rfc3339(time.as_str()) {
-                    dt > now
+            .find(|g| {
+                if let Ok(dt) = DateTime::parse_from_rfc3339(g.0.as_str()) {
+                    g.1 || dt > now
                 } else {
                     false
                 }
             })
         {
-            Some(
-                DateTime::parse_from_rfc3339(t.as_str())
+            Some((
+                DateTime::parse_from_rfc3339(t.0.as_str())
                     .unwrap()
                     .timestamp(),
-            )
+                t.1,
+            ))
         } else {
             None
         }
@@ -66,7 +72,7 @@ impl NhlApi {
         self.dates.iter().any(|date| {
             date.games
                 .iter()
-                .any(|game| game.status.detailedState == "InGame")
+                .any(|game| game.status.detailedState == "In Progress")
         })
     }
 }
