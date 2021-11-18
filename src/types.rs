@@ -24,10 +24,7 @@ pub struct Frame {
 
 impl Frame {
     fn new(text: String, icon: Option<usize>) -> Frame {
-        Frame {
-            text,
-            icon: icon,
-        }
+        Frame { text, icon: icon }
     }
 }
 

@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate rocket;
 use chrono::{DateTime, Duration, Local, Utc};
-use rocket::serde::{json::Json};
-mod types;
+use rocket::serde::json::Json;
 mod maps;
-use crate::types::{LaMetricIndicator, NhlApi};
+mod types;
 use crate::maps::{ICONS, MSG};
+use crate::types::{LaMetricIndicator, NhlApi};
 
 #[get("/")]
 fn index() -> &'static str {
