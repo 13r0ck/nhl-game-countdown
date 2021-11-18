@@ -7,8 +7,13 @@ mod maps;
 use crate::types::{LaMetricIndicator, NhlApi};
 use crate::maps::{ICONS, MSG};
 
-#[get("/?<id>")]
-async fn index(id: &'_ str) -> Option<Json<LaMetricIndicator>> {
+#[get("/")]
+fn index() -> &'static str {
+    "nhl-game-countdown - Visit https://github.com/13r0ck/nhl-game-countdown for more information"
+}
+
+#[post("/?<id>")]
+async fn api(id: &'_ str) -> Option<Json<LaMetricIndicator>> {
     let now_local = Local::now();
     let in_99_days = now_local + Duration::days(99);
     match reqwest::get(format!(
@@ -66,5 +71,7 @@ fn pu(num: i64) -> String {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    rocket::build()
+        .mount("/", routes![index])
+        .mount("/", routes![api])
 }

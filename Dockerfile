@@ -17,11 +17,7 @@ RUN mkdir /compile-path/server
 
 # 1c: Download and compile Rust dependencies (and store as a separate Docker layer)
 WORKDIR /usr/server
-#RUN cargo install --target x86_64-unknown-linux-musl --path .
-
-# 1d: Build the package using the actual source code
 RUN cargo install --target x86_64-unknown-linux-musl --path . --features=vendored
-#RUN cargo build --release
 RUN cp ./target/x86_64-unknown-linux-musl/release/nhl-game-countdown /compile-path/server/
 
 # Changing the volume from within the Dockerfile: If any build steps change the data within the volume after it has been declared, those changes will be discarded. Thus:
@@ -34,6 +30,5 @@ VOLUME /compile-path
 # // to a scratch image. Hopefully I will figure that out eventually
 FROM alpine:latest
 COPY --from=builder /compile-path/server /server
-RUN ls /server
 USER 1000
 CMD ROCKET_PORT=$PORT ./server/nhl-game-countdown
