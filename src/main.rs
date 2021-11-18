@@ -5,7 +5,7 @@ use rocket::serde::{json::Json};
 mod types;
 mod maps;
 use crate::types::{LaMetricIndicator, NhlApi};
-use crate::maps::ICONS;
+use crate::maps::{ICONS, MSG};
 
 #[get("/?<id>")]
 async fn index(id: &'_ str) -> Option<Json<LaMetricIndicator>> {
@@ -27,7 +27,8 @@ async fn index(id: &'_ str) -> Option<Json<LaMetricIndicator>> {
             if let Some((game_time, is_active)) = nhl_api.current_or_next_game(now_utc) {
                 let icon = ICONS.get(&id).cloned();
                 if is_active {
-                    Some(Json(LaMetricIndicator::new("Go Avs Go".to_string(), icon)))
+                    let msg = MSG.get(&id).unwrap_or(&"Error").to_string();
+                    Some(Json(LaMetricIndicator::new(msg, icon)))
                 } else {
                     Some(Json(LaMetricIndicator::new(
                         pretty_timer(now_utc.timestamp(), game_time),
