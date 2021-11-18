@@ -1,22 +1,20 @@
 #[macro_use]
 extern crate rocket;
-use chrono::{DateTime, Duration, FixedOffset, Local, Utc};
-use rocket::serde::{json::Json, Deserialize, Serialize};
+use chrono::{DateTime, Duration, Local, Utc};
+use rocket::serde::{json::Json};
 mod types;
 use crate::types::{LaMetricIndicator, NhlApi};
-use std::convert::TryInto;
-use std::time;
 
 #[get("/?<id>&<icon>")]
 async fn index(id: u32, icon: u32) -> Option<Json<LaMetricIndicator>> {
     let now_local = Local::now();
-    let in_100_days = now_local + Duration::days(100);
+    let in_99_days = now_local + Duration::days(99);
     //Ok(resp) => Some(Json(LaMetricIndicator::new(resp.next_game(utc_time), icon))),
     match reqwest::get(format!(
         "https://statsapi.web.nhl.com/api/v1/schedule?teamid={}&startDate={}&endDate={}",
         id,
         simple_date(now_local),
-        simple_date(in_100_days)
+        simple_date(in_99_days)
     ))
     .await
     .unwrap()

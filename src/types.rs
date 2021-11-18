@@ -1,5 +1,5 @@
-use chrono::{DateTime, FixedOffset, Local, TimeZone, Utc};
-use rocket::serde::{json::Json, Deserialize, Serialize};
+use chrono::{DateTime, Utc};
+use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -77,6 +77,7 @@ pub struct Date {
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
+#[allow(non_snake_case)]
 pub struct Game {
     pub gameDate: String,
     pub status: Status,
@@ -84,6 +85,7 @@ pub struct Game {
 
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
+#[allow(non_snake_case)]
 pub struct Status {
     pub detailedState: String,
 }
