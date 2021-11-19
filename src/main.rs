@@ -2,23 +2,22 @@
 extern crate rocket;
 use chrono::{DateTime, Duration, Local, Utc};
 use rocket::serde::json::Json;
-mod maps;
 mod types;
-use crate::maps::{ICONS, MSG};
-use crate::types::{LaMetricIndicator, NhlApi};
+use crate::types::{LaMetricIndicator, NhlApi, Team};
 
 #[get("/")]
 fn index() -> &'static str {
     "nhl-game-countdown - Visit https://github.com/13r0ck/nhl-game-countdown for more information"
 }
 
-#[get("/?<id>")]
-async fn api(id: &'_ str) -> Option<Json<LaMetricIndicator>> {
+#[get("/?<team>")]
+async fn api(team: &'_ str) -> Option<Json<LaMetricIndicator>> {
+    let team = Team::from(team);
     let now_local = Local::now();
     let in_99_days = now_local + Duration::days(99);
     match reqwest::get(format!(
         "https://statsapi.web.nhl.com/api/v1/schedule?teamid={}&startDate={}&endDate={}",
-        id,
+        team,
         simple_date(now_local),
         simple_date(in_99_days)
     ))
@@ -30,14 +29,12 @@ async fn api(id: &'_ str) -> Option<Json<LaMetricIndicator>> {
         Ok(nhl_api) => {
             let now_utc = DateTime::<Utc>::from_utc(now_local.naive_utc(), Utc);
             if let Some((game_time, is_active)) = nhl_api.current_or_next_game(now_utc) {
-                let icon = ICONS.get(&id).cloned();
                 if is_active {
-                    let msg = MSG.get(&id).unwrap_or(&"Error").to_string();
-                    Some(Json(LaMetricIndicator::new(msg, icon)))
+                    Some(Json(LaMetricIndicator::new("In Game".to_string(), team.icon())))
                 } else {
                     Some(Json(LaMetricIndicator::new(
                         pretty_timer(now_utc.timestamp(), game_time),
-                        icon,
+                        team.icon(),
                     )))
                 }
             } else {
