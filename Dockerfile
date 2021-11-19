@@ -28,7 +28,8 @@ VOLUME /compile-path
 # // This docker container works with `FROM scratch` to save on image size, though using google cloud run requires that the port be $PORT
 # // as seen in `CMD ROCKET_PORT=$PORT`, but I have not figured out how to either compile rocket in a way or to add an enironment variable
 # // to a scratch image. Hopefully I will figure that out eventually
-FROM alpine:latest
+FROM alpine:latest as runner
 COPY --from=builder /compile-path/server /server
 USER 1000
-CMD ROCKET_PORT=$PORT ./server/nhl-game-countdown
+RUN ls ./server
+CMD ROCKET_PORT=$PORT ROCKET_ADDRESS="0.0.0.0" ./server/nhl-game-countdown
