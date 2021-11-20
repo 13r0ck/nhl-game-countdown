@@ -23,13 +23,15 @@ RUN cp ./target/x86_64-unknown-linux-musl/release/nhl-game-countdown /compile-pa
 # Changing the volume from within the Dockerfile: If any build steps change the data within the volume after it has been declared, those changes will be discarded. Thus:
 VOLUME /compile-path
 
-# 3: Copy the exe and extra files ("static") to an empty Docker image
-#
-# // This docker container works with `FROM scratch` to save on image size, though using google cloud run requires that the port be $PORT
-# // as seen in `CMD ROCKET_PORT=$PORT`, but I have not figured out how to either compile rocket in a way or to add an enironment variable
-# // to a scratch image. Hopefully I will figure that out eventually
+# 3: Copy the package and extra files to an alpine Docker image
 FROM alpine:latest as runner
 COPY --from=builder /compile-path/server /server
+RUN apk add tzdata
+# This is specific to the location that my server is hosted. You will need to
+# change the timezone here to the location where the server is hosted.
+# https://wiki.alpinelinux.org/wiki/Setting_the_timezone
+RUN cp /usr/share/zoneinfo/America/Mexico_City /etc/localtime
+RUN echo "America/Mexico_City" >  /etc/timezone
+RUN apk del tzdata
 USER 1000
-RUN ls ./server
 CMD ROCKET_PORT=$PORT ROCKET_ADDRESS="0.0.0.0" ./server/nhl-game-countdown
