@@ -42,8 +42,8 @@ impl Default for Team {
     }
 }
 
-impl From<&'_ str> for Team {
-    fn from(team: &'_ str) -> Team {
+impl Team {
+    pub fn new(team: &'_ str) -> Team {
         match team {
             "Carolina Hurricanes" => Team::CarolinaHurricanes,
             "Columbus Blue Jackets" => Team::ColumbusBlueJackets,
@@ -80,9 +80,7 @@ impl From<&'_ str> for Team {
             _ => Team::default()
         }
     }
-}
 
-impl Team {
     pub fn icon(&self) -> usize {
         match self {
             Team::CarolinaHurricanes => 555,
@@ -103,7 +101,7 @@ impl Team {
             Team::TorontoMapleLeafs => 555,
             Team::ArizonaCoyotes => 555,
             Team::ChicagoBlackhawks => 555,
-            Team::ColoradoAvalanche => 21,
+            Team::ColoradoAvalanche => 47478,
             Team::DallasStars => 555,
             Team::MinnesotaWild => 555,
             Team::NashvillePredators => 555,

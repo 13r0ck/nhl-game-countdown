@@ -12,11 +12,11 @@ fn index() -> &'static str {
 
 #[get("/?<team>")]
 async fn api(team: &'_ str) -> Option<Json<LaMetricIndicator>> {
-    let team = Team::from(team);
+    let team = Team::new(team);
     let now_local = Local::now();
     let in_99_days = now_local + Duration::days(99);
     match reqwest::get(format!(
-        "https://statsapi.web.nhl.com/api/v1/schedule?teamid={}&startDate={}&endDate={}",
+        "https://statsapi.web.nhl.com/api/v1/schedule?teamId={}&startDate={}&endDate={}",
         team,
         simple_date(now_local),
         simple_date(in_99_days)
