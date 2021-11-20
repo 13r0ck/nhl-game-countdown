@@ -77,7 +77,7 @@ impl Team {
             "Seattle Kraken" => Team::SeattleKraken,
             "Vancouver Canucks" => Team::VancouverCanucks,
             "Vegas Golden Knights" => Team::VegasGoldenKnights,
-            _ => Team::default()
+            _ => Team::default(),
         }
     }
 
