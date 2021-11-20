@@ -162,6 +162,55 @@ impl std::fmt::Display for Team {
     }
 }
 
+pub enum GameState {
+    Scheduled,
+    PreGame,
+    InProgress,
+}
+
+impl GameState {
+    pub fn new(state: &'_ str) -> GameState {
+        match state {
+            "Scheduled" => GameState::Scheduled,
+            "In Progress" => GameState::InProgress,
+            "Pre-Game" => GameState::PreGame,
+            _ => GameState::Scheduled,
+        }
+    }
+
+    pub fn is_active(&self) -> bool {
+        match self {
+            GameState::Scheduled => false,
+            _ => true,
+        }
+    }
+}
+
+impl std::fmt::Display for GameState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                GameState::InProgress => "In Game",
+                GameState::PreGame => "PreGame",
+                GameState::Scheduled => "Scheduled",
+            }
+        )
+    }
+}
+
+impl From<&'_ str> for GameState {
+    fn from(state: &'_ str) -> Self {
+        match state {
+            "Scheduled" => GameState::Scheduled,
+            "In Progress" => GameState::InProgress,
+            "Pre-Game" => GameState::PreGame,
+            _ => GameState::Scheduled,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct LaMetricIndicator {
@@ -196,7 +245,7 @@ pub struct NhlApi {
 }
 
 impl NhlApi {
-    pub fn current_or_next_game(self, now: DateTime<Utc>) -> Option<(i64, bool)> {
+    pub fn current_or_next_game(self, now: DateTime<Utc>) -> Option<(i64, GameState)> {
         if let Some(t) = self
             .dates
             .into_iter()
@@ -204,12 +253,12 @@ impl NhlApi {
             .map(|date| {
                 date.games
                     .into_iter()
-                    .map(|game| (game.gameDate, (game.status.detailedState == "In Progress")))
+                    .map(|game| (game.gameDate, GameState::new(&game.status.detailedState)))
             })
             .flatten()
             .find(|g| {
                 if let Ok(dt) = DateTime::parse_from_rfc3339(g.0.as_str()) {
-                    g.1 || dt > now
+                    g.1.is_active() || dt > now
                 } else {
                     false
                 }

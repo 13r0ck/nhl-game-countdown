@@ -28,10 +28,10 @@ async fn api(team: &'_ str) -> Option<Json<LaMetricIndicator>> {
     {
         Ok(nhl_api) => {
             let now_utc = DateTime::<Utc>::from_utc(now_local.naive_utc(), Utc);
-            if let Some((game_time, is_active)) = nhl_api.current_or_next_game(now_utc) {
-                if is_active {
+            if let Some((game_time, state)) = nhl_api.current_or_next_game(now_utc) {
+                if state.is_active() {
                     Some(Json(LaMetricIndicator::new(
-                        "In Game".to_string(),
+                        format!("{}", state),
                         team.icon(),
                     )))
                 } else {
