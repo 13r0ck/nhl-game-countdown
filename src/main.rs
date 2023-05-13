@@ -15,7 +15,7 @@ async fn api(team: &'_ str, utc_offset: &'_ str) -> Json<LaMetricIndicator> {
     let team = Team::new(team);
     let now_local = Local::now();
     let now_user = DateTime::from_local(
-        now_local.clone().naive_local(),
+        now_local.naive_local(),
         Offset::new(utc_offset).into(),
     );
     let in_99_days = now_local + Duration::days(99);
