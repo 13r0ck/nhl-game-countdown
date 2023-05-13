@@ -3,17 +3,21 @@ extern crate rocket;
 use chrono::{DateTime, Duration, Local, Utc};
 use rocket::serde::json::Json;
 mod types;
-use crate::types::{LaMetricIndicator, NhlApi, Team};
+use crate::types::{LaMetricIndicator, NhlApi, Offset, Team};
 
 #[get("/")]
 fn index() -> &'static str {
     "nhl-game-countdown - Visit https://github.com/13r0ck/nhl-game-countdown for more information"
 }
 
-#[get("/?<team>")]
-async fn api(team: &'_ str) -> Option<Json<LaMetricIndicator>> {
+#[get("/?<team>&<utc_offset>")]
+async fn api(team: &'_ str, utc_offset: &'_ str) -> Json<LaMetricIndicator> {
     let team = Team::new(team);
     let now_local = Local::now();
+    let now_user = DateTime::from_local(
+        now_local.clone().naive_local(),
+        Offset::new(utc_offset).into(),
+    );
     let in_99_days = now_local + Duration::days(99);
     match reqwest::get(format!(
         "https://statsapi.web.nhl.com/api/v1/schedule?teamId={}&startDate={}&endDate={}",
@@ -30,22 +34,26 @@ async fn api(team: &'_ str) -> Option<Json<LaMetricIndicator>> {
             let now_utc = DateTime::<Utc>::from_utc(now_local.naive_utc(), Utc);
             if let Some((game_time, state)) = nhl_api.current_or_next_game(now_utc) {
                 if state.is_active() {
-                    Some(Json(LaMetricIndicator::new(
-                        format!("{}", state),
-                        team.icon(),
-                    )))
+                    Json(LaMetricIndicator::new(format!("{}", state), team.icon()))
                 } else {
-                    Some(Json(LaMetricIndicator::new(
+                    Json(LaMetricIndicator::new(
                         pretty_timer(now_utc.timestamp(), game_time),
                         team.icon(),
-                    )))
+                    ))
                 }
             } else {
-                None
+                error(now_user, team)
             }
         }
-        Err(_) => None,
+        Err(_) => error(now_user, team),
     }
+}
+
+fn error(time: DateTime<Local>, team: Team) -> Json<LaMetricIndicator> {
+    Json(LaMetricIndicator::new(
+        format!("{}", time.format("%X")),
+        team.icon(),
+    ))
 }
 
 fn simple_date(now: DateTime<Local>) -> String {

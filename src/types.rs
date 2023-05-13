@@ -1,6 +1,7 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, FixedOffset, Utc};
 use rocket::serde::{Deserialize, Serialize};
 
+#[derive(Default, Debug, Clone, Copy)]
 pub enum Team {
     CarolinaHurricanes,
     ColumbusBlueJackets,
@@ -20,6 +21,7 @@ pub enum Team {
     TorontoMapleLeafs,
     ArizonaCoyotes,
     ChicagoBlackhawks,
+    #[default]
     ColoradoAvalanche,
     DallasStars,
     MinnesotaWild,
@@ -34,12 +36,6 @@ pub enum Team {
     SeattleKraken,
     VancouverCanucks,
     VegasGoldenKnights,
-}
-
-impl Default for Team {
-    fn default() -> Team {
-        Team::ColoradoAvalanche
-    }
 }
 
 impl Team {
@@ -162,6 +158,145 @@ impl std::fmt::Display for Team {
     }
 }
 
+#[derive(Default, Clone, Copy, Debug)]
+pub enum Offset {
+    Minus1200,
+    Minus1100,
+    Minus1000,
+    Minus0930,
+    Minus0900,
+    Minus0800,
+    #[default]
+    Minus0700,
+    Minus0600,
+    Minus0500,
+    Minus0400,
+    Minus0300,
+    Minus0330,
+    Minus0200,
+    Minus0100,
+    Utc,
+    Plus0100,
+    Plus0200,
+    Plus0300,
+    Plus0330,
+    Plus0400,
+    Plus0430,
+    Plus0500,
+    Plus0530,
+    Plus0545,
+    Plus0600,
+    Plus0700,
+    Plus0800,
+    Plus0900,
+    Plus0930,
+    Plus1000,
+    Plus1030,
+    Plus1100,
+    Plus1200,
+    Plus1245,
+    Plus1300,
+    Plus1400,
+}
+
+impl Offset {
+    pub fn new(offset: &str) -> Self {
+        match offset {
+            "UTC-1200" => Offset::Minus1200,
+            "UTC-1100" => Offset::Minus1100,
+            "UTC-1000" => Offset::Minus1000,
+            "UTC-0930" => Offset::Minus0930,
+            "UTC-0900" => Offset::Minus0900,
+            "UTC-0800" => Offset::Minus0800,
+            "UTC-0700" => Offset::Minus0700,
+            "UTC-0600" => Offset::Minus0600,
+            "UTC-0500" => Offset::Minus0500,
+            "UTC-0400" => Offset::Minus0400,
+            "UTC-0300" => Offset::Minus0300,
+            "UTC-0330" => Offset::Minus0330,
+            "UTC-0200" => Offset::Minus0200,
+            "UTC-0100" => Offset::Minus0100,
+            "UTC-0000" => Offset::Utc,
+            "UTC+0100" => Offset::Plus0100,
+            "UTC+0200" => Offset::Plus0200,
+            "UTC+0300" => Offset::Plus0300,
+            "UTC+0330" => Offset::Plus0330,
+            "UTC+0400" => Offset::Plus0400,
+            "UTC+0430" => Offset::Plus0430,
+            "UTC+0500" => Offset::Plus0500,
+            "UTC+0530" => Offset::Plus0530,
+            "UTC+0545" => Offset::Plus0545,
+            "UTC+0600" => Offset::Plus0600,
+            "UTC+0700" => Offset::Plus0700,
+            "UTC+0800" => Offset::Plus0800,
+            "UTC+0900" => Offset::Plus0900,
+            "UTC+0930" => Offset::Plus0930,
+            "UTC+1000" => Offset::Plus1000,
+            "UTC+1030" => Offset::Plus1030,
+            "UTC+1100" => Offset::Plus1100,
+            "UTC+1200" => Offset::Plus1200,
+            "UTC+1245" => Offset::Plus1245,
+            "UTC+1300" => Offset::Plus1300,
+            "UTC+1400" => Offset::Plus1400,
+            _ => Offset::default(),
+        }
+    }
+}
+
+impl From<Offset> for FixedOffset {
+    fn from(offset: Offset) -> FixedOffset {
+        const HOURS: i32 = 3600;
+        const MINS: i32 = 60;
+        const EAST: fn(i32) -> Option<FixedOffset> = FixedOffset::east_opt;
+        const WEST: fn(i32) -> Option<FixedOffset> = FixedOffset::west_opt;
+        match offset {
+            Offset::Minus1200 => WEST(HOURS * 12),
+            Offset::Minus1100 => WEST(HOURS * 11),
+            Offset::Minus1000 => WEST(HOURS * 10),
+            Offset::Minus0930 => WEST(HOURS * 9 + MINS * 30),
+            Offset::Minus0900 => WEST(HOURS * 9),
+            Offset::Minus0800 => WEST(HOURS * 8),
+            Offset::Minus0700 => WEST(HOURS * 7),
+            Offset::Minus0600 => WEST(HOURS * 6),
+            Offset::Minus0500 => WEST(HOURS * 5),
+            Offset::Minus0400 => WEST(HOURS * 4),
+            Offset::Minus0300 => WEST(HOURS * 3),
+            Offset::Minus0330 => WEST(HOURS * 3 + MINS * 30),
+            Offset::Minus0200 => WEST(HOURS * 2),
+            Offset::Minus0100 => WEST(HOURS),
+            Offset::Utc => WEST(0),
+            Offset::Plus0100 => EAST(HOURS),
+            Offset::Plus0200 => EAST(HOURS * 2),
+            Offset::Plus0300 => EAST(HOURS * 3),
+            Offset::Plus0330 => EAST(HOURS * 3 + MINS * 30),
+            Offset::Plus0400 => EAST(HOURS * 4),
+            Offset::Plus0430 => EAST(HOURS * 4 + MINS * 30),
+            Offset::Plus0500 => EAST(HOURS * 5),
+            Offset::Plus0530 => EAST(HOURS * 5 + MINS * 30),
+            Offset::Plus0545 => EAST(HOURS * 5 + MINS * 45),
+            Offset::Plus0600 => EAST(HOURS * 6),
+            Offset::Plus0700 => EAST(HOURS * 7),
+            Offset::Plus0800 => EAST(HOURS * 8),
+            Offset::Plus0900 => EAST(HOURS * 9),
+            Offset::Plus0930 => EAST(HOURS * 9 + MINS * 30),
+            Offset::Plus1000 => EAST(HOURS * 10),
+            Offset::Plus1030 => EAST(HOURS * 10 + MINS * 30),
+            Offset::Plus1100 => EAST(HOURS * 11),
+            Offset::Plus1200 => EAST(HOURS * 12),
+            Offset::Plus1245 => EAST(HOURS * 12 + MINS * 45),
+            Offset::Plus1300 => EAST(HOURS * 13),
+            Offset::Plus1400 => EAST(HOURS * 14),
+        }
+        .unwrap()
+    }
+}
+
+impl chrono::offset::Offset for Offset {
+    fn fix(&self) -> FixedOffset {
+        (*self).into()
+    }
+}
+
 pub enum GameState {
     Scheduled,
     PreGame,
@@ -179,10 +314,7 @@ impl GameState {
     }
 
     pub fn is_active(&self) -> bool {
-        match self {
-            GameState::Scheduled => false,
-            _ => true,
-        }
+        !matches!(self, GameState::Scheduled)
     }
 }
 
@@ -250,12 +382,11 @@ impl NhlApi {
             .dates
             .into_iter()
             // take nhl api data structure and convert it into a iter of tuple (date, is_active)
-            .map(|date| {
+            .flat_map(|date| {
                 date.games
                     .into_iter()
                     .map(|game| (game.gameDate, GameState::new(&game.status.detailedState)))
             })
-            .flatten()
             .find(|g| {
                 if let Ok(dt) = DateTime::parse_from_rfc3339(g.0.as_str()) {
                     g.1.is_active() || dt > now
