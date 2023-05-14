@@ -14,9 +14,9 @@ All of the code here is what runs on my server. There is no tracking and I log *
 sudo docker build -t nhl-game-countdown . && sudo docker run --env PORT='8080' -p 8080:8080 nhl-game-countdown
 ```
 
-The API is very simple. Just create a `GET` request to `https://nhl.gtcountdown.com/?team=<team_name>&utc_offset=<local_utc_offset>`
+The API is very simple. Just create a `GET` request to `https://nhl.gtcountdown.com/?team=<team_name>&utc_offset=<local_utc_offset>&format=<use 24-hour?>`
 
-For example: `https://nhl.gtcountdown.com/?team=Colorado+Avalanche&utc_offset=UTC-0700`
+For example: `https://nhl.gtcountdown.com/?team=Colorado+Avalanche&utc_offset=UTC-0700&format=0`
 The `team` names are all in plain engligh, but the full list is provided below.
 
 ```
@@ -94,3 +94,5 @@ UTC+1245
 UTC+1300
 UTC+1400
 ```
+
+Time format can also be specified. `format=0` is 12-hour, `format=1` is 24-hour.

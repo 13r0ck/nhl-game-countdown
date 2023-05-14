@@ -10,14 +10,11 @@ fn index() -> &'static str {
     "nhl-game-countdown - Visit https://github.com/13r0ck/nhl-game-countdown for more information"
 }
 
-#[get("/?<team>&<utc_offset>")]
-async fn api(team: &'_ str, utc_offset: &'_ str) -> Json<LaMetricIndicator> {
+#[get("/?<team>&<utc_offset>&<format>")]
+async fn api(team: &'_ str, utc_offset: &'_ str, format: u8) -> Json<LaMetricIndicator> {
     let team = Team::new(team);
     let now_local = Local::now();
-    let now_user = DateTime::from_local(
-        now_local.naive_local(),
-        Offset::new(utc_offset).into(),
-    );
+    let now_user = DateTime::from_local(now_local.naive_local(), Offset::new(utc_offset).into());
     let in_99_days = now_local + Duration::days(99);
     match reqwest::get(format!(
         "https://statsapi.web.nhl.com/api/v1/schedule?teamId={}&startDate={}&endDate={}",
@@ -42,16 +39,23 @@ async fn api(team: &'_ str, utc_offset: &'_ str) -> Json<LaMetricIndicator> {
                     ))
                 }
             } else {
-                error(now_user, team)
+                error(now_user, team, format)
             }
         }
-        Err(_) => error(now_user, team),
+        Err(_) => error(now_user, team, format),
     }
 }
 
-fn error(time: DateTime<Local>, team: Team) -> Json<LaMetricIndicator> {
+fn error(time: DateTime<Local>, team: Team, use_24_hour: u8) -> Json<LaMetricIndicator> {
     Json(LaMetricIndicator::new(
-        format!("{}", time.format("%X")),
+        format!(
+            "{}",
+            if use_24_hour == 1 {
+                time.format("%k:%M")
+            } else {
+                time.format("%l:%M")
+            }
+        ),
         team.icon(),
     ))
 }
