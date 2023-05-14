@@ -5,13 +5,16 @@ use rocket::serde::json::Json;
 mod types;
 use crate::types::{LaMetricIndicator, NhlApi, Offset, Team};
 
-#[get("/")]
+#[get("/", rank = 0)]
 fn index() -> &'static str {
     "nhl-game-countdown - Visit https://github.com/13r0ck/nhl-game-countdown for more information"
 }
 
 #[get("/?<team>&<utc_offset>&<format>")]
-async fn api(team: &'_ str, utc_offset: &'_ str, format: u8) -> Json<LaMetricIndicator> {
+async fn api(team: &'_ str, utc_offset: &'_ str, format: &'_ str) -> Json<LaMetricIndicator> {
+    // Handle lametric's test website sending different data than the runtime app :/
+    let use_24_hour = format == "true" || format == "1";
+
     let team = Team::new(team);
     let now_local = Local::now();
     let now_user = DateTime::from_local(now_local.naive_local(), Offset::new(utc_offset).into());
@@ -39,18 +42,18 @@ async fn api(team: &'_ str, utc_offset: &'_ str, format: u8) -> Json<LaMetricInd
                     ))
                 }
             } else {
-                error(now_user, team, format)
+                error(now_user, team, use_24_hour)
             }
         }
-        Err(_) => error(now_user, team, format),
+        Err(_) => error(now_user, team, use_24_hour),
     }
 }
 
-fn error(time: DateTime<Local>, team: Team, use_24_hour: u8) -> Json<LaMetricIndicator> {
+fn error(time: DateTime<Local>, team: Team, use_24_hour: bool) -> Json<LaMetricIndicator> {
     Json(LaMetricIndicator::new(
         format!(
             "{}",
-            if use_24_hour == 1 {
+            if use_24_hour {
                 time.format("%k:%M")
             } else {
                 time.format("%l:%M")
@@ -84,6 +87,6 @@ fn pu(num: i64) -> String {
 #[launch]
 fn rocket() -> _ {
     rocket::build()
-        .mount("/", routes![index])
         .mount("/", routes![api])
+        .mount("/", routes![index])
 }
