@@ -32,7 +32,11 @@ impl Game {
     }
 
     pub fn is_current(&self) -> bool {
-        matches!(self.game_state, GameState::Live)
+        match self.game_state {
+          GameState::Live => true,
+          GameState::Pregame => true,
+          _ => false,
+        }
     }
 }
 
@@ -50,6 +54,7 @@ impl std::fmt::Display for Game {
                 format!("{:02}:{:02}:{:02}", days, hours, remaining)
             }
             GameState::Live => String::from("Live"),
+            GameState::Pregame => String::from("Pregame"),
             _ => String::from("ERROR"),
         };
         write!(f, "{}", stdout)
@@ -61,6 +66,7 @@ pub enum GameState {
     Final,
     Off,
     Future,
+    Pregame,
     Live,
 }
 
@@ -253,6 +259,7 @@ impl<'de> Deserialize<'de> for GameState {
                     "FINAL" => Ok(GameState::Final),
                     "OFF" => Ok(GameState::Off),
                     "FUT" => Ok(GameState::Future),
+                    "PRE" => Ok(GameState::Pregame),
                     "LIVE" => Ok(GameState::Live),
                     _ => Ok(GameState::Future),
                 }
