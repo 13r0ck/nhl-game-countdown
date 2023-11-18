@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = { version = "0.5.0-rc.4", features = ["json"] }
+rocket = { version = "0.5.0", features = ["json"] }
 reqwest = { version = "0.11", features = ["json", "blocking"] }
 tokio = { version = "1", features = ["full"] }
 chrono = { version = "0.4", features = ["std"] }
 openssl-sys = "*"
-serde = { version = "1.0.192", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
 
 [features]
 # Force openssl-sys to staticly link in the openssl library. Necessary when
