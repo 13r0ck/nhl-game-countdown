@@ -261,6 +261,7 @@ impl<'de> Deserialize<'de> for GameState {
                     "FUT" => Ok(GameState::Future),
                     "PRE" => Ok(GameState::Pregame),
                     "LIVE" => Ok(GameState::Live),
+                    "CRIT" => Ok(GameState::Live),
                     _ => Ok(GameState::Future),
                 }
             }
